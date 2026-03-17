@@ -48,11 +48,11 @@ class CoinAnkTester(BaseTester):
         "open_interest_list": {"path": "/api/v1/coinank/open-interest/list", "params": {"baseCoin": "BTC"}},
         # open_interest_history 不需要 exchange 参数，只需要 symbol 和 interval
         "open_interest_history": {"path": "/api/v1/coinank/open-interest/history", "params": {"exchange": "Binance", "symbol": "BTCUSDT", "interval": "1h", "endTime": get_one_day_ago_timestamp_ms(), "size": 10}},
-        "open_interest_kline": {"path": "/api/v1/coinank/open-interest/kline", "params": {"symbol": "BTCUSDT", "exchange": "Binance", "interval": "1h", "endTime": get_one_day_ago_timestamp_ms()}},
-        "open_interest_agg_history": {"path": "/api/v1/coinank/open-interest/agg-history", "params": {"baseCoin": "BTC", "interval": "1h", "endTime": get_one_day_ago_timestamp_ms()}},
-        "open_interest_agg_kline": {"path": "/api/v1/coinank/open-interest/agg-kline", "params": {"baseCoin": "BTC", "interval": "1h", "endTime": get_one_day_ago_timestamp_ms()}},
+        "open_interest_kline": {"path": "/api/v1/coinank/open-interest/kline", "params": {"symbol": "BTCUSDT", "exchange": "Binance", "interval": "1h", "endTime": get_one_day_ago_timestamp_ms(), "size": 10}},
+        "open_interest_agg_history": {"path": "/api/v1/coinank/open-interest/agg-history", "params": {"baseCoin": "BTC", "interval": "1h", "endTime": get_one_day_ago_timestamp_ms(), "size": 10}},
+        "open_interest_agg_kline": {"path": "/api/v1/coinank/open-interest/agg-kline", "params": {"baseCoin": "BTC", "interval": "1h", "endTime": get_one_day_ago_timestamp_ms(), "size": 10}},
         "open_interest_coin_realtime": {"path": "/api/v1/coinank/open-interest/coin-realtime", "params": {"baseCoin": "BTC"}},
-        "open_interest_oi_vs_mc": {"path": "/api/v1/coinank/open-interest/oi-vs-mc", "params": {"baseCoin": "BTC", "interval": "1h", "endTime": get_one_day_ago_timestamp_ms()}},
+        "open_interest_oi_vs_mc": {"path": "/api/v1/coinank/open-interest/oi-vs-mc", "params": {"baseCoin": "BTC", "interval": "1h", "endTime": get_one_day_ago_timestamp_ms(), "size": 10}},
 
         # ========== 资金费率 ==========
         "funding_rate_realtime": {"path": "/api/v1/coinank/funding-rate/realtime", "params": {"type": "current"}},
@@ -61,27 +61,27 @@ class CoinAnkTester(BaseTester):
         # funding_rate_weighted 需要 baseCoin, interval, endTime，动态处理
         "funding_rate_kline": {"path": "/api/v1/coinank/funding-rate/kline", "params": {"symbol": "BTCUSDT", "exchange": "Binance", "interval": "1h", "endTime": get_one_day_ago_timestamp_ms(), "size": 10}},
         "funding_rate_heatmap": {"path": "/api/v1/coinank/funding-rate/heatmap", "params": {"type": "marketCap", "interval": "1M"}},
-        "funding_rate_symbol_history": {"path": "/api/v1/coinank/funding-rate/symbol-history", "params": {"symbol": "BTCUSDT", "exchange": "Binance", "interval": "1h", "endTime": get_one_day_ago_timestamp_ms()}},
+        "funding_rate_symbol_history": {"path": "/api/v1/coinank/funding-rate/symbol-history", "params": {"symbol": "BTCUSDT", "exchange": "Binance", "interval": "1h", "endTime": get_one_day_ago_timestamp_ms(), "size": 10}},
 
         # ========== 多空比 ==========
         "long_short_exchange": {"path": "/api/v1/coinank/long-short/exchange", "params": {"baseCoin": "BTC", "productType": "SWAP"}},
-        "long_short_account": {"path": "/api/v1/coinank/long-short/account", "params": {"symbol": "BTCUSDT", "exchange": "Binance", "interval": "1h", "endTime": get_one_day_ago_timestamp_ms()}},
-        "long_short_top_trader": {"path": "/api/v1/coinank/long-short/top-trader", "params": {"symbol": "BTCUSDT", "exchange": "Binance", "interval": "1h", "endTime": get_one_day_ago_timestamp_ms()}},
+        "long_short_account": {"path": "/api/v1/coinank/long-short/account", "params": {"symbol": "BTCUSDT", "exchange": "Binance", "interval": "1h", "endTime": get_one_day_ago_timestamp_ms(), "size": 10}},
+        "long_short_top_trader": {"path": "/api/v1/coinank/long-short/top-trader", "params": {"symbol": "BTCUSDT", "exchange": "Binance", "interval": "1h", "endTime": get_one_day_ago_timestamp_ms(), "size": 10}},
         # long_short_kline 需要 type 参数 (longShortPerson/longShortPosition/longShortAccount)
-        "long_short_kline": {"path": "/api/v1/coinank/long-short/kline", "params": {"type": "longShortPerson", "symbol": "BTCUSDT", "exchange": "Binance", "interval": "1h", "endTime": get_one_day_ago_timestamp_ms()}},
-        "long_short_taker_ratio": {"path": "/api/v1/coinank/long-short/taker-ratio", "params": {"baseCoin": "BTC", "interval": "1h", "endTime": get_one_day_ago_timestamp_ms()}},
-        "long_short_top_trader_account": {"path": "/api/v1/coinank/long-short/top-trader-account", "params": {"symbol": "BTCUSDT", "exchange": "Binance", "interval": "1h", "endTime": get_one_day_ago_timestamp_ms()}},
+        "long_short_kline": {"path": "/api/v1/coinank/long-short/kline", "params": {"type": "longShortPerson", "symbol": "BTCUSDT", "exchange": "Binance", "interval": "1h", "endTime": get_one_day_ago_timestamp_ms(), "size": 10}},
+        "long_short_taker_ratio": {"path": "/api/v1/coinank/long-short/taker-ratio", "params": {"baseCoin": "BTC", "interval": "1h", "endTime": get_one_day_ago_timestamp_ms(), "size": 10}},
+        "long_short_top_trader_account": {"path": "/api/v1/coinank/long-short/top-trader-account", "params": {"symbol": "BTCUSDT", "exchange": "Binance", "interval": "1h", "endTime": get_one_day_ago_timestamp_ms(), "size": 10}},
 
         # ========== CVD/市价单 ==========
-        "cvd_kline": {"path": "/api/v1/coinank/cvd/kline", "params": {"symbol": "BTCUSDT", "exchange": "Binance", "interval": "1h", "productType": "SWAP", "endTime": get_one_day_ago_timestamp_ms()}},
+        "cvd_kline": {"path": "/api/v1/coinank/cvd/kline", "params": {"symbol": "BTCUSDT", "exchange": "Binance", "interval": "1h", "productType": "SWAP", "endTime": get_one_day_ago_timestamp_ms(), "size": 10}},
         # cvd_agg 需要 exchanges 参数(空字符串表示聚合所有交易所)，不是 baseCoin
-        "cvd_agg": {"path": "/api/v1/coinank/cvd/agg", "params": {"exchanges": "", "interval": "1h", "productType": "SWAP", "endTime": get_one_day_ago_timestamp_ms()}},
-        "buy_sell_count": {"path": "/api/v1/coinank/buy-sell/count", "params": {"symbol": "BTCUSDT", "exchange": "Binance", "interval": "1h", "productType": "SWAP", "endTime": get_one_day_ago_timestamp_ms()}},
-        "buy_sell_volume": {"path": "/api/v1/coinank/buy-sell/volume", "params": {"symbol": "BTCUSDT", "exchange": "Binance", "interval": "1h", "productType": "SWAP", "endTime": get_one_day_ago_timestamp_ms()}},
-        "buy_sell_amount": {"path": "/api/v1/coinank/buy-sell/amount", "params": {"symbol": "BTCUSDT", "exchange": "Binance", "interval": "1h", "productType": "SWAP", "endTime": get_one_day_ago_timestamp_ms()}},
-        "buy_sell_agg_count": {"path": "/api/v1/coinank/buy-sell/agg-count", "params": {"baseCoin": "BTC", "interval": "1h", "productType": "SWAP", "endTime": get_one_day_ago_timestamp_ms()}},
-        "buy_sell_agg_volume": {"path": "/api/v1/coinank/buy-sell/agg-volume", "params": {"baseCoin": "BTC", "interval": "1h", "productType": "SWAP", "endTime": get_one_day_ago_timestamp_ms()}},
-        "buy_sell_agg_amount": {"path": "/api/v1/coinank/buy-sell/agg-amount", "params": {"baseCoin": "BTC", "interval": "1h", "productType": "SWAP", "endTime": get_one_day_ago_timestamp_ms()}},
+        "cvd_agg": {"path": "/api/v1/coinank/cvd/agg", "params": {"exchanges": "", "interval": "1h", "productType": "SWAP", "endTime": get_one_day_ago_timestamp_ms(), "size": 10}},
+        "buy_sell_count": {"path": "/api/v1/coinank/buy-sell/count", "params": {"symbol": "BTCUSDT", "exchange": "Binance", "interval": "1h", "productType": "SWAP", "endTime": get_one_day_ago_timestamp_ms(), "size": 10}},
+        "buy_sell_volume": {"path": "/api/v1/coinank/buy-sell/volume", "params": {"symbol": "BTCUSDT", "exchange": "Binance", "interval": "1h", "productType": "SWAP", "endTime": get_one_day_ago_timestamp_ms(), "size": 10}},
+        "buy_sell_amount": {"path": "/api/v1/coinank/buy-sell/amount", "params": {"symbol": "BTCUSDT", "exchange": "Binance", "interval": "1h", "productType": "SWAP", "endTime": get_one_day_ago_timestamp_ms(), "size": 10}},
+        "buy_sell_agg_count": {"path": "/api/v1/coinank/buy-sell/agg-count", "params": {"baseCoin": "BTC", "interval": "1h", "productType": "SWAP", "endTime": get_one_day_ago_timestamp_ms(), "size": 10}},
+        "buy_sell_agg_volume": {"path": "/api/v1/coinank/buy-sell/agg-volume", "params": {"baseCoin": "BTC", "interval": "1h", "productType": "SWAP", "endTime": get_one_day_ago_timestamp_ms(), "size": 10}},
+        "buy_sell_agg_amount": {"path": "/api/v1/coinank/buy-sell/agg-amount", "params": {"baseCoin": "BTC", "interval": "1h", "productType": "SWAP", "endTime": get_one_day_ago_timestamp_ms(), "size": 10}},
 
         # ========== K线 ==========
         "kline": {"path": "/api/v1/coinank/kline", "params": {"symbol": "BTCUSDT", "exchange": "Binance", "interval": "1h"}},
@@ -122,11 +122,11 @@ class CoinAnkTester(BaseTester):
 
         # ========== 订单本 ==========
         # order_book_by_symbol 需要interval参数
-        "order_book_by_symbol": {"path": "/api/v1/coinank/order-book/by-symbol", "params": {"symbol": "BTCUSDT", "exchange": "Binance", "rate": "0.01", "productType": "SWAP", "interval": "1h", "endTime": get_one_day_ago_timestamp_ms()}},
+        "order_book_by_symbol": {"path": "/api/v1/coinank/order-book/by-symbol", "params": {"symbol": "BTCUSDT", "exchange": "Binance", "rate": "0.01", "productType": "SWAP", "interval": "1h", "endTime": get_one_day_ago_timestamp_ms(), "size": 10}},
         # order_book_by_exchange 需要interval参数
-        "order_book_by_exchange": {"path": "/api/v1/coinank/order-book/by-exchange", "params": {"baseCoin": "BTC", "productType": "SWAP", "interval": "1h", "endTime": get_one_day_ago_timestamp_ms()}},
+        "order_book_by_exchange": {"path": "/api/v1/coinank/order-book/by-exchange", "params": {"baseCoin": "BTC", "productType": "SWAP", "interval": "1h", "endTime": get_one_day_ago_timestamp_ms(), "size": 10}},
         # order_book_heatmap interval只支持1m/3m/5m
-        "order_book_heatmap": {"path": "/api/v1/coinank/order-book/heatmap", "params": {"symbol": "BTCUSDT", "exchange": "Binance", "interval": "1m", "endTime": get_one_day_ago_timestamp_ms()}},
+        "order_book_heatmap": {"path": "/api/v1/coinank/order-book/heatmap", "params": {"symbol": "BTCUSDT", "exchange": "Binance", "interval": "1m", "endTime": get_one_day_ago_timestamp_ms(), "size": 10}},
 
         # ========== 订单流 ==========
         # order_flow_lists 需要interval参数，tickCount是必填
@@ -136,8 +136,8 @@ class CoinAnkTester(BaseTester):
         # ========== 资金流/净头寸 ==========
         "capital_flow_realtime": {"path": "/api/v1/coinank/capital-flow/realtime", "params": {"productType": "SWAP"}},
         # capital_flow_history interval是必填参数
-        "capital_flow_history": {"path": "/api/v1/coinank/capital-flow/history", "params": {"baseCoin": "BTC", "productType": "SWAP", "interval": "1h", "endTime": get_one_day_ago_timestamp_ms()}},
-        "net_positions": {"path": "/api/v1/coinank/net-positions", "params": {"symbol": "BTCUSDT", "exchange": "Binance", "interval": "1h", "endTime": get_one_day_ago_timestamp_ms()}},
+        "capital_flow_history": {"path": "/api/v1/coinank/capital-flow/history", "params": {"baseCoin": "BTC", "productType": "SWAP", "interval": "1h", "endTime": get_one_day_ago_timestamp_ms(), "size": 10}},
+        "net_positions": {"path": "/api/v1/coinank/net-positions", "params": {"symbol": "BTCUSDT", "exchange": "Binance", "interval": "1h", "endTime": get_one_day_ago_timestamp_ms(), "size": 10}},
     }
 
     # 已屏蔽的接口列表（用于报告）

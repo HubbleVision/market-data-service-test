@@ -4,10 +4,10 @@ Configuration for Market Data Service Test Framework
 import os
 
 # Base URL for the market data service
-BASE_URL = os.getenv("MARKET_DATA_SERVICE_URL", "http://localhost:8080")
+BASE_URL = os.getenv("MARKET_DATA_SERVICE_URL", "http://localhost:3101")
 
 # API Key for authentication
-API_KEY = os.getenv("MARKET_DATA_API_KEY", "hubble-market-data-2024")
+API_KEY = os.getenv("MARKET_DATA_API_KEY", "7fXZt817QOeBr4H2XH/mDmhKO+2yybe1prDYDSg4HOD8gC7qeiZBfscuZgtMnVOK")
 
 # Timeout for API requests (in seconds)
 REQUEST_TIMEOUT = 30
@@ -17,11 +17,14 @@ MAX_RETRIES = 3
 RETRY_DELAY = 1
 
 # Test configuration - Updated to match actual service
-# Symbol format uses "/" separator (e.g., BTC/USDT)
+# Symbol format uses no separator (e.g., BTCUSDT)
 TEST_SYMBOLS = {
-    "binance": ["BTC/USDT", "ETH/USDT", "BNB/USDT"],
-    "bitget": ["BTC/USDT", "ETH/USDT"],
-    "kucoin": ["BTC/USDT", "ETH/USDT"],
+    "binance": ["BTCUSDT", "ETHUSDT", "BNBUSDT"],
+    "bitget": ["BTCUSDT", "ETHUSDT"],
+    "kucoin": ["BTCUSDT", "ETHUSDT"],
+    "aster": ["BTCUSDT", "ETHUSDT"],
+    "hyperliquid": ["BTCUSDT", "ETHUSDT"],
+    "weex": ["BTCUSDT", "ETHUSDT"],
 }
 
 # K-line intervals supported by the service

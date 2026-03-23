@@ -74,8 +74,6 @@ class CoinAnkTester(BaseTester):
 
         # ========== CVD/市价单 ==========
         "cvd_kline": {"path": "/api/v1/coinank/cvd/kline", "params": {"symbol": "BTCUSDT", "exchange": "Binance", "interval": "1h", "productType": "SWAP", "endTime": get_one_day_ago_timestamp_ms(), "size": 10}},
-        # cvd_agg 需要 exchanges 参数(空字符串表示聚合所有交易所)，不是 baseCoin
-        "cvd_agg": {"path": "/api/v1/coinank/cvd/agg", "params": {"exchanges": "", "interval": "1h", "productType": "SWAP", "endTime": get_one_day_ago_timestamp_ms(), "size": 10}},
         "buy_sell_count": {"path": "/api/v1/coinank/buy-sell/count", "params": {"symbol": "BTCUSDT", "exchange": "Binance", "interval": "1h", "productType": "SWAP", "endTime": get_one_day_ago_timestamp_ms(), "size": 10}},
         "buy_sell_volume": {"path": "/api/v1/coinank/buy-sell/volume", "params": {"symbol": "BTCUSDT", "exchange": "Binance", "interval": "1h", "productType": "SWAP", "endTime": get_one_day_ago_timestamp_ms(), "size": 10}},
         "buy_sell_amount": {"path": "/api/v1/coinank/buy-sell/amount", "params": {"symbol": "BTCUSDT", "exchange": "Binance", "interval": "1h", "productType": "SWAP", "endTime": get_one_day_ago_timestamp_ms(), "size": 10}},
@@ -84,7 +82,8 @@ class CoinAnkTester(BaseTester):
         "buy_sell_agg_amount": {"path": "/api/v1/coinank/buy-sell/agg-amount", "params": {"baseCoin": "BTC", "interval": "1h", "productType": "SWAP", "endTime": get_one_day_ago_timestamp_ms(), "size": 10}},
 
         # ========== K线 ==========
-        "kline": {"path": "/api/v1/coinank/kline", "params": {"symbol": "BTCUSDT", "exchange": "Binance", "interval": "1h", "productType": "SWAP"}},
+        # kline 必须传 endTime 参数，否则返回 system error
+        "kline": {"path": "/api/v1/coinank/kline", "params": {"symbol": "BTCUSDT", "exchange": "Binance", "interval": "1h", "productType": "SWAP", "endTime": get_one_day_ago_timestamp_ms(), "size": 10}},
 
         # ========== 指标数据 ==========
         "indicator_fear_greed": {"path": "/api/v1/coinank/indicator/fear-greed", "params": {}},
@@ -103,7 +102,8 @@ class CoinAnkTester(BaseTester):
         "etf_eth_flow": {"path": "/api/v1/coinank/etf/eth-flow", "params": {}},
 
         # ========== 新闻快讯 ==========
-        "news_list": {"path": "/api/v1/coinank/news/list", "params": {"size": "10"}},
+        # news_list 必填参数: type, lang, page, pageSize, isPopular, search (search不能为空字符串)
+        "news_list": {"path": "/api/v1/coinank/news/list", "params": {"type": "1", "lang": "zh", "page": "1", "pageSize": "10", "isPopular": "false", "search": "BTC"}},
         # "news_detail": {"path": "/api/v1/coinank/news/detail", "params": {"id": "1"}},  # 需要有效的新闻ID
 
         # ========== HyperLiquid 鲸鱼 ==========
@@ -113,8 +113,8 @@ class CoinAnkTester(BaseTester):
         # ========== 大额订单 ==========
         # large_order_market 需要: symbol, productType, amount, endTime (必填), size (可选)
         "large_order_market": {"path": "/api/v1/coinank/large-order/market", "params": {"symbol": "BTCUSDT", "productType": "SWAP", "amount": "10000000", "endTime": get_one_day_ago_timestamp_ms(), "size": "10"}},
-        # large_order_limit 需要: symbol, exchangeType, isHistory (必填), amount/exchange/side/size/startTime (可选)
-        "large_order_limit": {"path": "/api/v1/coinank/large-order/limit", "params": {"symbol": "BTCUSDT", "exchangeType": "SWAP", "isHistory": "true", "size": "10"}},
+        # large_order_limit 需要: symbol, exchangeType, isHistory (必填), amount, exchange, side, startTime (可选但建议传)
+        "large_order_limit": {"path": "/api/v1/coinank/large-order/limit", "params": {"symbol": "BTCUSDT", "exchangeType": "SWAP", "isHistory": "true", "amount": "1000000", "exchange": "Binance", "side": "ask", "size": "10", "startTime": get_one_day_ago_timestamp_ms()}},
 
         # ========== 热门排行 ==========
         "ranking_open_interest": {"path": "/api/v1/coinank/ranking/open-interest", "params": {}},
@@ -125,14 +125,14 @@ class CoinAnkTester(BaseTester):
         # ========== 订单本 ==========
         # order_book_by_symbol 需要interval参数
         "order_book_by_symbol": {"path": "/api/v1/coinank/order-book/by-symbol", "params": {"symbol": "BTCUSDT", "exchange": "Binance", "rate": "0.01", "productType": "SWAP", "interval": "1h", "endTime": get_one_day_ago_timestamp_ms(), "size": 10}},
-        # order_book_by_exchange 需要interval参数，exchanges可以传空字符串表示聚合所有交易所
-        "order_book_by_exchange": {"path": "/api/v1/coinank/order-book/by-exchange", "params": {"baseCoin": "BTC", "productType": "SWAP", "interval": "1h", "endTime": get_one_day_ago_timestamp_ms(), "size": 10, "exchanges": ""}},
+        # order_book_by_exchange 需要完整的参数: symbol, exchange, rate, productType, interval, endTime, size, baseCoin, exchanges, type
+        "order_book_by_exchange": {"path": "/api/v1/coinank/order-book/by-exchange", "params": {"symbol": "BTCUSDT", "exchange": "Binance", "rate": "0.01", "productType": "SWAP", "interval": "1h", "endTime": get_one_day_ago_timestamp_ms(), "size": 10, "baseCoin": "BTC", "exchanges": "Binance", "type": "0.01"}},
         # order_book_heatmap interval只支持1m/3m/5m
         "order_book_heatmap": {"path": "/api/v1/coinank/order-book/heatmap", "params": {"symbol": "BTCUSDT", "exchange": "Binance", "interval": "1m", "endTime": get_one_day_ago_timestamp_ms(), "size": 10}},
 
         # ========== 订单流 ==========
-        # order_flow_lists 需要interval参数，tickCount是必填
-        "order_flow_lists": {"path": "/api/v1/coinank/order-flow/lists", "params": {"symbol": "BTCUSDT", "exchange": "Binance", "interval": "1h", "productType": "SWAP", "tickCount": "1", "endTime": get_one_day_ago_timestamp_ms()}},
+        # order_flow_lists 需要interval参数，tickCount是必填，size也是必须的
+        "order_flow_lists": {"path": "/api/v1/coinank/order-flow/lists", "params": {"symbol": "BTCUSDT", "exchange": "Binance", "interval": "1h", "productType": "SWAP", "tickCount": "2", "size": 10, "endTime": get_one_day_ago_timestamp_ms()}},
 
         # ========== 资金流/净头寸 ==========
         # ========== 资金流/净头寸 ==========
@@ -140,6 +140,9 @@ class CoinAnkTester(BaseTester):
         # capital_flow_history interval是必填参数
         "capital_flow_history": {"path": "/api/v1/coinank/capital-flow/history", "params": {"baseCoin": "BTC", "productType": "SWAP", "interval": "1h", "endTime": get_one_day_ago_timestamp_ms(), "size": 10}},
         "net_positions": {"path": "/api/v1/coinank/net-positions", "params": {"symbol": "BTCUSDT", "exchange": "Binance", "interval": "1h", "endTime": get_one_day_ago_timestamp_ms(), "size": 10}},
+
+        # ========== RSI选币器 ==========
+        "rsi_screener": {"path": "/api/v1/coinank/rsi/screener", "params": {"interval": "1H", "exchange": "Binance"}},
     }
 
     # 已屏蔽的接口列表（用于报告）
@@ -288,6 +291,7 @@ class CoinAnkTester(BaseTester):
             "ranking": [k for k in self.ENDPOINTS if k.startswith("ranking")],
             "order": [k for k in self.ENDPOINTS if k.startswith("order_") or k.startswith("large_order")],
             "capital": [k for k in self.ENDPOINTS if k.startswith("capital") or k.startswith("net_positions")],
+            "rsi": [k for k in self.ENDPOINTS if k.startswith("rsi")],
         }
 
         if category not in category_endpoints:

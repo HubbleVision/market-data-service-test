@@ -10,6 +10,7 @@ from test_kline import KLineTester
 from test_indicator import IndicatorTester
 from test_coinank import CoinAnkTester
 from test_glassnode import GlassnodeTester
+from test_v2_indicator import V2IndicatorTester
 
 
 def print_header(title):
@@ -94,6 +95,20 @@ def main():
         all_results["glassnode"] = {"summary": {"total": 1, "passed": 0, "failed": 1, "errors": 0, "success_rate": 0}}
     finally:
         glassnode_tester.close()
+
+    # 5. Test V2 Indicator APIs
+    print_header("5. V2 INDICATOR APIs")
+    try:
+        v2_tester = V2IndicatorTester()
+        results = v2_tester.run_all_tests()
+        v2_tester.generate_report("v2_indicator_test")
+        all_results["v2_indicators"] = results
+        print_summary(results, "V2 Indicators")
+    except Exception as e:
+        print(f"V2 Indicator tests failed: {e}")
+        all_results["v2_indicators"] = {"summary": {"total": 1, "passed": 0, "failed": 1, "errors": 0, "success_rate": 0}}
+    finally:
+        v2_tester.close()
 
     # Overall Summary
     print_header("OVERALL SUMMARY")

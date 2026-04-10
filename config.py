@@ -4,7 +4,7 @@ Configuration for Market Data Service Test Framework
 import os
 
 # Base URL for the market data service
-BASE_URL = os.getenv("MARKET_DATA_SERVICE_URL", "http://localhost:3101")
+BASE_URL = os.getenv("MARKET_DATA_SERVICE_URL", "http://172.17.0.1:3101")
 
 # API Key for authentication
 API_KEY = os.getenv("MARKET_DATA_API_KEY", "7fXZt817QOeBr4H2XH/mDmhKO+2yybe1prDYDSg4HOD8gC7qeiZBfscuZgtMnVOK")
@@ -65,11 +65,17 @@ TUSHARE_CONFIG = {
     },
 }
 
-# V2 Technical indicators (26 个，含 V1 已有的 11 个 + 新增 15 个)
+# V2 Technical indicators (53 个，含 V1 已有的 11 个 + 新增 42 个)
 V2_INDICATORS = [
     "sma", "ema", "rsi", "macd", "boll", "kdj", "atr", "obv", "cci", "adx", "vwap",
     "aroon", "sar", "trix", "ht_trendline", "stoch", "mom", "roc", "cmo",
     "ultosc", "ppo", "natr", "stddev", "ad", "mfi", "willr", "adosc",
+    # 新增指标 (指标补充)
+    "wma", "dema", "tema", "trima", "kama", "t3", "midpoint",
+    "stochf", "stochrsi", "apo", "rocr", "bop", "adxr",
+    "dx", "plus_dm", "minus_dm", "plus_di", "minus_di", "trange", "aroonosc",
+    "ht_sine", "ht_trendmode", "ht_dcperiod", "ht_dcphase", "ht_phasor",
+    "macdext", "midprice",
 ]
 
 # V2 指标默认参数 (key=指标名, value=query 参数字典)

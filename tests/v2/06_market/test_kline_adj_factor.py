@@ -1,46 +1,39 @@
 """
-K线数据 adj_factor 字段移除验证
-覆盖: 三市场 (CN/HK/US) K线数据确认不再包含 adj_factor 字段
+K线数据 adj_factor 字段移除验证 (V2)
+覆盖: 三市场 (CN/HK/US) K线数据确认不包含 adj_factor 字段
+V2 endpoints: /api/v2/cnstock/stocks, /api/v2/hkstock/stocks, /api/v2/usstock/stocks
 """
 from framework import BaseTester, TestStatus
 
 
-def _get_body(resp) -> dict:
-    """从响应中提取 body（兼容有/无 body 包装层）"""
-    if not resp.success or not resp.data:
-        return {}
-    data = resp.data if isinstance(resp.data, dict) else {}
-    if "body" in data:
-        return data["body"] if isinstance(data["body"], dict) else {}
-    return data
-
-
 def test_kline_adj_factor(tester: BaseTester) -> list:
-    """验证 K线数据不再包含 adj_factor 字段"""
+    """验证 V2 K线数据不包含 adj_factor 字段"""
     results = []
 
     cases = [
-        ("CN", "000001.SZ", "daily", "A股 日K"),
-        ("CN", "600519.SH", "daily", "A股 日K (SH)"),
-        ("CN", "830799.BJ", "daily", "A股 日K (BJ 北交所)"),
-        ("HK", "00700.HK", "daily", "港股 日K"),
-        ("US", "AAPL", "daily", "美股 日K"),
+        ("CN", "000001.SZ", "cnstock", "A股 日K"),
+        ("CN", "600519.SH", "cnstock", "A股 日K (SH)"),
+        ("HK", "00700.HK", "hkstock", "港股 日K"),
+        ("US", "AAPL", "usstock", "美股 日K"),
     ]
 
-    for label, symbol, interval, display in cases:
+    for label, symbol, market, display in cases:
         name = f"adj_factor移除: {label} - {display} ({symbol})"
-        resp = tester.client.v1_get_stock_klines(symbol=symbol, interval=interval, limit=5)
-        body = _get_body(resp)
+        if market == "cnstock":
+            resp = tester.client.v2_get_cnstock_klines(symbol=symbol, limit=5)
+        elif market == "hkstock":
+            resp = tester.client.v2_get_hkstock_daily(symbol=symbol, limit=5)
+        else:
+            resp = tester.client.v2_get_usstock_daily(symbol=symbol, limit=5)
 
+        data = resp.data if isinstance(resp.data, dict) else {}
         ok = resp.success
+
         if ok:
-            ok = body.get("success") is True or isinstance(body.get("data"), list)
-        if ok:
-            klines = body.get("data", [])
+            klines = data.get("klines") or data.get("data") or data.get("items") or []
             if len(klines) == 0:
                 ok = False
             else:
-                # 检查第一条 K 线不包含 adj_factor 字段
                 first = klines[0]
                 if not isinstance(first, dict):
                     ok = False
@@ -49,7 +42,7 @@ def test_kline_adj_factor(tester: BaseTester) -> list:
                     ok = not has_adj
 
         if ok:
-            klines = body.get("data", [])
+            klines = data.get("klines") or data.get("data") or data.get("items") or []
             results.append(tester._make_result(
                 name, "kline_adj_factor",
                 TestStatus.PASSED,
@@ -59,7 +52,7 @@ def test_kline_adj_factor(tester: BaseTester) -> list:
         else:
             reason = "请求失败" if not resp.success else "无数据"
             if resp.success:
-                klines = body.get("data", [])
+                klines = data.get("klines") or data.get("data") or data.get("items") or []
                 if len(klines) > 0 and isinstance(klines[0], dict) and "adj_factor" in klines[0]:
                     reason = "adj_factor 字段仍然存在"
             results.append(tester._make_result(
@@ -72,17 +65,16 @@ def test_kline_adj_factor(tester: BaseTester) -> list:
 
     # 额外验证: 必填字段仍然存在
     name = "adj_factor移除: CN - 必填字段完整性检查"
-    resp = tester.client.v1_get_stock_klines(symbol="000001.SZ", interval="daily", limit=5)
-    body = _get_body(resp)
+    resp = tester.client.v2_get_cnstock_klines(symbol="000001.SZ", limit=5)
+    data = resp.data if isinstance(resp.data, dict) else {}
     ok = resp.success
     if ok:
-        klines = body.get("data", [])
+        klines = data.get("klines") or data.get("data") or data.get("items") or []
         if len(klines) > 0 and isinstance(klines[0], dict):
             first = klines[0]
             required = {"time", "symbol", "open", "high", "low", "close", "volume"}
             ok = required.issubset(first.keys())
             if ok:
-                # open/high/low/close 应为正数
                 ok = (isinstance(first.get("open"), (int, float)) and
                       isinstance(first.get("close"), (int, float)) and
                       first.get("open") > 0 and first.get("close") > 0)

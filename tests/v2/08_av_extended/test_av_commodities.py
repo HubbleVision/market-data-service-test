@@ -1,19 +1,17 @@
 """
-AV 扩展 — 商品专用端点 (P1)
-覆盖: GOLD_SILVER_SPOT, GOLD_SILVER_HISTORY, NATURAL_GAS, COPPER,
-      ALUMINUM, WHEAT, CORN, COTTON, SUGAR, COFFEE, ALL_COMMODITIES
+AV 扩展 — 商品专用端点 (V2)
+覆盖: GOLD_SILVER_SPOT, GOLD_SILVER_HISTORY, NATURAL_GAS, COPPER, ALUMINUM, WTI, BRENT
+服务端白名单: WTI, BRENT, NATURAL_GAS, COPPER, ALUMINUM
 """
 from framework import BaseTester, TestStatus
 
+# 仅保留服务端白名单内的品种
 COMMODITIES = [
+    ("WTI", "WTI原油"),
+    ("BRENT", "布伦特原油"),
     ("NATURAL_GAS", "天然气"),
     ("COPPER", "铜"),
     ("ALUMINUM", "铝"),
-    ("WHEAT", "小麦"),
-    ("CORN", "玉米"),
-    ("COTTON", "棉花"),
-    ("SUGAR", "糖"),
-    ("COFFEE", "咖啡"),
 ]
 
 
@@ -43,7 +41,7 @@ def test_av_gold_silver_history(tester: BaseTester) -> list:
     results = []
 
     for interval in ["daily", "weekly", "monthly"]:
-        resp = tester.client.v2_av_gold_silver_history(interval=interval, limit=10)
+        resp = tester.client.v2_av_gold_silver_history(interval=interval)
         data = resp.data if isinstance(resp.data, dict) else {}
         ok = resp.success and data.get("success") is True
 
@@ -64,7 +62,7 @@ def test_av_gold_silver_history(tester: BaseTester) -> list:
 
 
 def test_av_commodity_individual(tester: BaseTester) -> list:
-    """各商品品种"""
+    """各商品品种 (仅白名单内: WTI/BRENT/NATURAL_GAS/COPPER/ALUMINUM)"""
     results = []
 
     for func_name, desc in COMMODITIES:
@@ -85,18 +83,11 @@ def test_av_commodity_individual(tester: BaseTester) -> list:
 
 
 def test_av_all_commodities(tester: BaseTester) -> list:
-    """大宗商品指数 ALL_COMMODITIES"""
-    results = []
-    resp = tester.client.v2_av_commodity(function_name="ALL_COMMODITIES")
-    data = resp.data if isinstance(resp.data, dict) else {}
-    ok = resp.success and data.get("success") is True
-
-    results.append(tester._make_result(
+    """ALL_COMMODITIES 不在服务端白名单内"""
+    return [tester._make_result(
         "ALL_COMMODITIES",
         "av_commodities",
-        TestStatus.PASSED if ok else TestStatus.FAILED,
-        f"商品指数 - {'OK' if ok else 'FAILED'}",
-        resp.response_time_ms,
-        resp.error if not ok else None,
-    ))
-    return results
+        TestStatus.SKIPPED,
+        "ALL_COMMODITIES 不在服务端白名单内",
+        0,
+    )]

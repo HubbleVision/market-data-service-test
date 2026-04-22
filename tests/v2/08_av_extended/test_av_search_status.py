@@ -1,55 +1,23 @@
 """
 AV 扩展 — 搜索与市场状态
-覆盖: SYMBOL_SEARCH, MARKET_STATUS, TOP_GAINERS_LOSERS
+覆盖: SYMBOL_SEARCH(无V2路由→SKIP), MARKET_STATUS, TOP_GAINERS_LOSERS
 """
 from framework import BaseTester, TestStatus
 
 
 def test_av_symbol_search(tester: BaseTester) -> list:
-    """测试股票搜索 SYMBOL_SEARCH"""
-    results = []
-    test_keywords = ["AAPL", "Tesla", "SPY"]
-
-    for kw in test_keywords:
-        resp = tester.client.v2_av_symbol_search(keywords=kw)
-        data = resp.data if isinstance(resp.data, dict) else {}
-        ok = resp.success and data.get("success") is True
-
-        if ok:
-            items = data.get("data") or data.get("results") or []
-            ok = isinstance(items, list) and len(items) > 0
-
-        if ok:
-            # 校验搜索结果包含关键字段
-            item = items[0] if isinstance(items, list) else items
-            ok = isinstance(item.get("symbol"), str) and len(item["symbol"]) > 0
-
-        results.append(tester._make_result(
-            f"SYMBOL_SEARCH ({kw})",
-            "av_search",
-            TestStatus.PASSED if ok else TestStatus.FAILED,
-            f"搜索 '{kw}' - {'OK, ' + str(len(data.get('data', []))) + ' 条' if ok else 'FAILED'}",
-            resp.response_time_ms,
-            resp.error if not ok else None,
-        ))
-
-    # 边界: 空关键词
-    resp_empty = tester.client.v2_av_symbol_search(keywords="")
-    ok_empty = resp_empty.success
-    results.append(tester._make_result(
-        "SYMBOL_SEARCH (空关键词)",
+    """V2 无 symbol search 路由"""
+    return [tester._make_result(
+        "SYMBOL_SEARCH",
         "av_search",
-        TestStatus.PASSED if ok_empty else TestStatus.FAILED,
-        "空关键词处理",
-        resp_empty.response_time_ms,
-        resp_empty.error if not ok_empty else None,
-    ))
-
-    return results
+        TestStatus.SKIPPED,
+        "V2 无 /api/v2/usstock/search 等价路由",
+        0,
+    )]
 
 
 def test_av_market_status(tester: BaseTester) -> list:
-    """测试全球市场状态 MARKET_STATUS"""
+    """测试美股市场状态"""
     results = []
 
     resp = tester.client.v2_av_market_status()
@@ -61,7 +29,6 @@ def test_av_market_status(tester: BaseTester) -> list:
         ok = isinstance(markets, list) and len(markets) > 0
 
     if ok:
-        # 校验市场条目字段
         item = markets[0]
         ok = isinstance(item.get("exchange"), str)
         if ok:
@@ -80,7 +47,7 @@ def test_av_market_status(tester: BaseTester) -> list:
 
 
 def test_av_top_gainers_losers(tester: BaseTester) -> list:
-    """测试涨跌排行 TOP_GAINERS_LOSERS"""
+    """测试涨跌排行"""
     results = []
 
     directions = ["top_gainers", "top_losers", "most_actively_traded"]

@@ -211,57 +211,14 @@ def test_usstock_av_min(tester: BaseTester) -> list:
 
 
 def test_usstock_av_v1_daily(tester: BaseTester) -> list:
-    """测试 /api/v1/stock/usstock/daily V1日线接口（含 AV 降级）"""
-    results = []
-
-    for symbol in US_SYMBOLS:
-        resp = tester.client.get_usstock_daily(symbol=symbol, limit=10)
-        ok = resp.success
-        data = resp.data if isinstance(resp.data, dict) else {}
-
-        source = None
-        if ok:
-            source = data.get("source", "")
-            items = data.get("data") or []
-            ok = isinstance(items, list) and len(items) > 0
-        if ok:
-            # OHLCV 字段校验
-            item = items[0]
-            required = ["time", "open", "high", "low", "close", "volume"]
-            ok = all(f in item for f in required)
-        if ok:
-            ok = isinstance(data.get("total"), (int, float)) and data["total"] > 0
-
-        label = f"source={source}" if source else "source未标注"
-        results.append(tester._make_result(
-            f"AV备用: V1 daily ({symbol}) [{label}]",
-            "usstock_av_v1_daily",
-            TestStatus.PASSED if ok else TestStatus.FAILED,
-            f"v1/daily({symbol}) {label} - {'OK' if ok else 'FAILED'}",
-            resp.response_time_ms,
-            resp.error if not ok else None,
-        ))
-
-    # 带 startDate/endDate 测试
-    resp2 = tester.client.get_usstock_daily(
-        symbol="AAPL", start_date="20250101", end_date="20250301", limit=10
-    )
-    ok2 = resp2.success
-    data2 = resp2.data if isinstance(resp2.data, dict) else {}
-    if ok2:
-        items2 = data2.get("data") or []
-        ok2 = isinstance(items2, list) and len(items2) > 0
-
-    results.append(tester._make_result(
-        "AV备用: V1 daily (带日期范围)",
+    """V1 日线接口已下线"""
+    return [tester._make_result(
+        "AV备用: V1 daily",
         "usstock_av_v1_daily",
-        TestStatus.PASSED if ok2 else TestStatus.FAILED,
-        f"v1/daily(AAPL, 20250101-20250301) - {'OK' if ok2 else 'FAILED'}",
-        resp2.response_time_ms,
-        resp2.error if not ok2 else None,
-    ))
-
-    return results
+        TestStatus.SKIPPED,
+        "V1 /api/v1/stock/usstock/daily 已下线，请使用 V2 /api/v2/usstock/stocks",
+        0,
+    )]
 
 
 def test_usstock_av_v2_daily(tester: BaseTester) -> list:

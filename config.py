@@ -12,6 +12,10 @@ API_KEY = os.getenv("MARKET_DATA_API_KEY", "7fXZt817QOeBr4H2XH/mDmhKO+2yybe1prDY
 # Timeout for API requests (in seconds)
 REQUEST_TIMEOUT = 30
 
+# Minimum interval between API requests (seconds)
+# Alpha Vantage $49.99 tier: 75 requests/minute → 1s interval
+REQUEST_INTERVAL = int(os.getenv("REQUEST_INTERVAL", "1"))
+
 # Retry configuration
 MAX_RETRIES = 3
 RETRY_DELAY = 1

@@ -15,7 +15,7 @@ from framework import BaseTester
 def main():
     parser = argparse.ArgumentParser(description="Run all tests")
     parser.add_argument("--include-v1", action="store_true",
-                        help="Include V1 legacy tests (glassnode, fund, finance, macro, reference, moneyflow)")
+                        help="Include V1 legacy tests (fund, finance, macro, reference, moneyflow)")
     args = parser.parse_args()
 
     # Import and run V2 tests
@@ -30,7 +30,6 @@ def main():
         print("Running V1 legacy tests...")
         print("=" * 60)
 
-        from tests.v1.test_glassnode import test_glassnode
         from tests.v1.test_tushare_fund import test_fund
         from tests.v1.test_tushare_finance import test_finance
         from tests.v1.test_tushare_macro import test_macro
@@ -41,7 +40,6 @@ def main():
         v1_tester.start_test_run()
         try:
             v1_modules = [
-                ("Glassnode", test_glassnode),
                 ("Fund", test_fund),
                 ("Finance", test_finance),
                 ("Macro", test_macro),

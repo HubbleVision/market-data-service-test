@@ -1,39 +1,39 @@
 """
 V2 HKStock indicator tests (10 indicators)
 MA, EMA, MACD, KDJ, RSI, BOLL, ATR, OBV, CCI, ADX
-Endpoints: /api/v1/hkstock/{indicator}
+Endpoints: /api/v2/indicators/{indicator}?market=hk&symbol=...
 """
 from config import TUSHARE_CONFIG
 from framework import BaseTester, TestResult, TestStatus
 
 HK_SYMBOLS = TUSHARE_CONFIG["hkstock"]["symbols"]
 
-# V1 端点的单值指标: (endpoint名, 响应中值字段名, 默认查询参数)
+# V2 端点的单值指标: (endpoint名, 响应中值字段名, 默认查询参数)
 SINGLE_VALUE_INDICATORS = {
-    "ma":  {"value_field": "ma",  "params": {"period": 20}},
-    "ema": {"value_field": "ema", "params": {"period": 20}},
-    "rsi": {"value_field": "rsi", "params": {"period": 14}},
-    "atr": {"value_field": "atr", "params": {"period": 14}},
-    "obv": {"value_field": "obv", "params": {}},
-    "cci": {"value_field": "cci", "params": {"period": 14}},
+    "sma":  {"value_field": "sma",  "params": {"period": 20}},
+    "ema":  {"value_field": "ema",  "params": {"period": 20}},
+    "rsi":  {"value_field": "rsi",  "params": {"period": 14}},
+    "atr":  {"value_field": "atr",  "params": {"period": 14}},
+    "obv":  {"value_field": "obv",  "params": {}},
+    "cci":  {"value_field": "cci",  "params": {"period": 14}},
 }
 
-# V1 端点的多值指标: (endpoint名, 嵌套对象名, 期望的子字段, 默认查询参数)
+# V2 端点的多值指标: (endpoint名, 嵌套对象名, 期望的子字段, 默认查询参数)
 MULTI_VALUE_INDICATORS = {
     "macd": {
         "nested": "macd",
         "fields": ["dif", "dea", "macd"],
-        "params": {"fast": 12, "slow": 26, "signal": 9},
+        "params": {"fast_period": 12, "slow_period": 26, "signal_period": 9},
     },
     "kdj": {
         "nested": "kdj",
         "fields": ["k", "d", "j"],
-        "params": {"fast_k": 9, "slow_k": 3, "slow_d": 3},
+        "params": {"fastk_period": 9, "slowk_period": 3, "slowd_period": 3},
     },
     "boll": {
         "nested": "boll",
         "fields": ["upper", "mid", "lower"],
-        "params": {"period": 20, "k": 2.0},
+        "params": {"period": 20, "nbdev": 2.0},
     },
     "adx": {
         "nested": "adx",
@@ -51,10 +51,10 @@ def test_hkstock_single_value_indicators(tester: BaseTester) -> list:
         tester._log(f"\n--- Testing HK single-value indicators for {symbol} ---")
 
         for indicator, cfg in SINGLE_VALUE_INDICATORS.items():
-            params = {"symbol": symbol, "interval": "1d"}
-            params.update(cfg["params"])
-
-            resp = tester.client.get(f"/api/v1/hkstock/{indicator}", params=params)
+            resp = tester.client.get_v2_indicator(
+                indicator=indicator, market="hk", symbol=symbol,
+                interval="1d", **cfg["params"]
+            )
             data = resp.data if isinstance(resp.data, dict) else {}
             ok = resp.success
 
@@ -86,10 +86,10 @@ def test_hkstock_multi_value_indicators(tester: BaseTester) -> list:
         tester._log(f"\n--- Testing HK multi-value indicators for {symbol} ---")
 
         for indicator, cfg in MULTI_VALUE_INDICATORS.items():
-            params = {"symbol": symbol, "interval": "1d"}
-            params.update(cfg["params"])
-
-            resp = tester.client.get(f"/api/v1/hkstock/{indicator}", params=params)
+            resp = tester.client.get_v2_indicator(
+                indicator=indicator, market="hk", symbol=symbol,
+                interval="1d", **cfg["params"]
+            )
             data = resp.data if isinstance(resp.data, dict) else {}
             ok = resp.success
 

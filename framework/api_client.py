@@ -9,7 +9,7 @@ from typing import Optional, Dict, Any, List
 from dataclasses import dataclass
 from enum import Enum
 
-from config import BASE_URL, REQUEST_TIMEOUT, MAX_RETRIES, RETRY_DELAY, VERBOSE, API_KEY
+from config import BASE_URL, REQUEST_TIMEOUT, MAX_RETRIES, RETRY_DELAY, VERBOSE, API_KEY, REQUEST_INTERVAL
 
 
 class ExchangeType(Enum):
@@ -57,9 +57,16 @@ class APIClient:
         url = f"{self.base_url}{endpoint}"
         last_error = None
 
+        # Rate limiting: wait between requests to avoid AV 5/min limit
+        _last_request_time = getattr(self, '_last_request_time', 0)
+        elapsed = time.time() - _last_request_time
+        if elapsed < REQUEST_INTERVAL:
+            time.sleep(REQUEST_INTERVAL - elapsed)
+
         for attempt in range(MAX_RETRIES):
             try:
                 start_time = time.time()
+                self._last_request_time = start_time
                 response = self.session.request(
                     method=method,
                     url=url,
@@ -1189,10 +1196,13 @@ class APIClient:
     # ==================== V2 Securities (Real-time Quote) ====================
 
     def v2_get_market_quote(self, market: str, codes: str, fields: str = None) -> APIResponse:
+        """V2 unified market quote — routes to per-market securities endpoint"""
+        market_map = {"hk": "hkstock", "cn": "cnstock", "us": "usstock"}
+        market_path = market_map.get(market, f"{market}stock")
         params = {"codes": codes}
         if fields:
             params["fields"] = fields
-        return self.get(f"/api/v2/market/quote/{market}", params=params)
+        return self.get(f"/api/v2/{market_path}/securities", params=params)
 
     def v2_get_hkstock_securities(self, codes: str, fields: str = None) -> APIResponse:
         params = {"codes": codes}
@@ -1261,30 +1271,6 @@ class APIClient:
         if end_date:
             params["endDate"] = end_date
         return self.get("/api/v2/usstock/trade-cal", params=params)
-
-    # ==================== V1 Unified Stock Klines/Indicators ====================
-
-    def v1_get_stock_klines(self, symbol: str, interval: str = "daily",
-                             start: str = None, end: str = None,
-                             limit: int = 100) -> APIResponse:
-        """V1 unified stock K-lines (auto-detect market from symbol)"""
-        params = {"symbol": symbol, "interval": interval, "limit": limit}
-        if start:
-            params["start"] = start
-        if end:
-            params["end"] = end
-        return self.get("/api/v1/stock/klines", params=params)
-
-    def v1_get_stock_indicators(self, symbol: str, interval: str = "daily",
-                                 limit: int = 100, start: str = None,
-                                 end: str = None) -> APIResponse:
-        """V1 unified stock technical indicators (auto-detect market from symbol)"""
-        params = {"symbol": symbol, "interval": interval, "limit": limit}
-        if start:
-            params["start"] = start
-        if end:
-            params["end"] = end
-        return self.get("/api/v1/stock/indicators", params=params)
 
     # ==================== V1 Tushare Stock API (legacy) ====================
 
@@ -1772,162 +1758,113 @@ class APIClient:
         if end_date: params["endDate"] = end_date
         return self.get("/api/v1/stock/usstock/trade-cal", params=params)
 
-    # ==================== Glassnode (V1 legacy) ====================
-
-    def get_glassnode_data(self, endpoint: str, params: dict = None) -> APIResponse:
-        return self.get(f"/api/v1/glassnode/{endpoint}", params=params)
-
     # ==================== V2 Alpha Vantage Extended ====================
 
-    def v2_av_symbol_search(self, keywords: str) -> APIResponse:
-        """股票/ETF/基金搜索"""
-        return self.get("/api/v1/market/search", params={"keywords": keywords})
-
     def v2_av_market_status(self) -> APIResponse:
-        """全球市场开收盘状态"""
-        return self.get("/api/v1/market/status")
+        """美股市场开收盘状态"""
+        return self.get("/api/v2/usstock/market-status")
 
     def v2_av_top_gainers_losers(self, direction: str = None) -> APIResponse:
         """涨跌排行 (top_gainers / top_losers / most_actively_traded)"""
         params = _drop_none({"direction": direction})
-        return self.get("/api/v1/market/top-movers", params=params)
+        return self.get("/api/v2/usstock/top-movers", params=params)
 
     def v2_av_daily_adjusted(self, symbol: str, limit: int = 100) -> APIResponse:
         """复权日 K 线"""
         return self.get("/api/v2/usstock/stocks", params={"symbol": symbol, "limit": limit, "adjusted": "true"})
 
     def v2_av_weekly_adjusted(self, symbol: str, limit: int = 100) -> APIResponse:
-        """复权周 K 线"""
-        return self.get("/api/v2/usstock/stocks", params={"symbol": symbol, "limit": limit, "interval": "weekly", "adjusted": "true"})
+        """复权周 K 线 (V2 无 weekly 路由，复用 daily+adjusted)"""
+        return self.get("/api/v2/usstock/stocks", params={"symbol": symbol, "limit": limit, "adjusted": "true"})
 
     def v2_av_monthly_adjusted(self, symbol: str, limit: int = 100) -> APIResponse:
-        """复权月 K 线"""
-        return self.get("/api/v2/usstock/stocks", params={"symbol": symbol, "limit": limit, "interval": "monthly", "adjusted": "true"})
+        """复权月 K 线 (V2 无 monthly 路由，复用 daily+adjusted)"""
+        return self.get("/api/v2/usstock/stocks", params={"symbol": symbol, "limit": limit, "adjusted": "true"})
 
     def v2_av_income_statement(self, symbol: str) -> APIResponse:
         """利润表"""
-        return self.get(f"/api/v1/stocks/{symbol}/income-statement")
+        return self.get("/api/v2/usstock/finance/income", params={"symbol": symbol})
 
     def v2_av_balance_sheet(self, symbol: str) -> APIResponse:
         """资产负债表"""
-        return self.get(f"/api/v1/stocks/{symbol}/balance-sheet")
+        return self.get("/api/v2/usstock/finance/balancesheet", params={"symbol": symbol})
 
     def v2_av_cash_flow(self, symbol: str) -> APIResponse:
         """现金流量表"""
-        return self.get(f"/api/v1/stocks/{symbol}/cash-flow")
+        return self.get("/api/v2/usstock/finance/cashflow", params={"symbol": symbol})
 
     def v2_av_earnings_estimates(self, symbol: str) -> APIResponse:
         """每股收益预估"""
-        return self.get(f"/api/v1/stocks/{symbol}/earnings-estimates")
+        return self.get("/api/v2/usstock/finance/forecast", params={"symbol": symbol})
 
     def v2_av_dividends(self, symbol: str) -> APIResponse:
         """历史股息"""
-        return self.get(f"/api/v1/stocks/{symbol}/dividends")
+        return self.get("/api/v2/usstock/finance/dividend", params={"symbol": symbol})
 
     def v2_av_splits(self, symbol: str) -> APIResponse:
         """历史拆股"""
-        return self.get(f"/api/v1/stocks/{symbol}/splits")
+        return self.get("/api/v2/usstock/finance/splits", params={"symbol": symbol})
 
     def v2_av_shares_outstanding(self, symbol: str) -> APIResponse:
         """流通股数量"""
-        return self.get(f"/api/v1/stocks/{symbol}/shares-outstanding")
+        return self.get("/api/v2/usstock/finance/shares", params={"symbol": symbol})
 
     def v2_av_etf_profile(self, symbol: str) -> APIResponse:
         """ETF 档案"""
-        return self.get(f"/api/v1/stocks/{symbol}/etf-profile")
-
-    def v2_av_listing_status(self) -> APIResponse:
-        """美股上市/退市列表"""
-        return self.get("/api/v2/usstock/listing-status")
+        return self.get("/api/v2/usstock/etf-profile", params={"symbol": symbol})
 
     def v2_av_earnings_calendar(self, horizon: str = "3month") -> APIResponse:
         """盈利日历"""
-        return self.get("/api/v1/market/calendar/earnings", params={"horizon": horizon})
+        return self.get("/api/v2/usstock/calendar/earnings", params={"horizon": horizon})
 
     def v2_av_ipo_calendar(self) -> APIResponse:
         """IPO 日历"""
-        return self.get("/api/v1/market/calendar/ipo")
-
-    def v2_av_fx_intraday(self, from_currency: str, to_currency: str, interval: str = "5min", limit: int = 100) -> APIResponse:
-        """外汇分钟线"""
-        return self.get("/api/v1/klines/fx/klines", params={"from": from_currency, "to": to_currency, "interval": interval, "limit": limit})
+        return self.get("/api/v2/usstock/calendar/ipo")
 
     def v2_av_fx_weekly(self, from_currency: str, to_currency: str, limit: int = 100) -> APIResponse:
-        """外汇周线"""
-        return self.get("/api/v1/klines/fx/klines", params={"from": from_currency, "to": to_currency, "interval": "weekly", "limit": limit})
+        """外汇周线 — V2 index/klines 不支持货币对，此方法无效"""
+        return APIResponse(success=False, status_code=0, data=None,
+                           error="FX has no V2 route (index/klines only supports index symbols)", response_time_ms=0)
 
     def v2_av_fx_monthly(self, from_currency: str, to_currency: str, limit: int = 100) -> APIResponse:
-        """外汇月线"""
-        return self.get("/api/v1/klines/fx/klines", params={"from": from_currency, "to": to_currency, "interval": "monthly", "limit": limit})
+        """外汇月线 — V2 index/klines 不支持货币对，此方法无效"""
+        return APIResponse(success=False, status_code=0, data=None,
+                           error="FX has no V2 route (index/klines only supports index symbols)", response_time_ms=0)
 
-    def v2_av_crypto_weekly(self, symbol: str, market: str = "USD", limit: int = 100) -> APIResponse:
-        """加密货币周线"""
-        return self.get("/api/v1/klines/crypto/klines", params={"symbol": symbol, "market": market, "interval": "weekly", "limit": limit})
-
-    def v2_av_crypto_monthly(self, symbol: str, market: str = "USD", limit: int = 100) -> APIResponse:
-        """加密货币月线"""
-        return self.get("/api/v1/klines/crypto/klines", params={"symbol": symbol, "market": market, "interval": "monthly", "limit": limit})
-
-    # --- 经济指标 (5 个新增) ---
-    def v2_av_real_gdp_per_capita(self) -> APIResponse:
-        return self.get("/api/v2/economic/real-gdp-per-capita")
-
-    def v2_av_federal_funds_rate(self) -> APIResponse:
-        return self.get("/api/v2/economic/federal-funds-rate")
-
-    def v2_av_retail_sales(self) -> APIResponse:
-        return self.get("/api/v2/economic/retail-sales")
-
-    def v2_av_durables(self) -> APIResponse:
-        return self.get("/api/v2/economic/durables")
-
-    def v2_av_nonfarm_payroll(self) -> APIResponse:
-        return self.get("/api/v2/economic/nonfarm-payroll")
-
-    # --- Alpha Intelligence ---
-    def v2_av_news_sentiment(self, tickers: str = None, topics: str = None, limit: int = 50) -> APIResponse:
-        """新闻情绪"""
-        params = _drop_none({"tickers": tickers, "topics": topics, "limit": limit})
-        return self.get("/api/v1/market/news-sentiment", params=params)
+    def v2_av_crypto_weekly(self, symbol: str = "BTC", market: str = "USD", limit: int = 100) -> APIResponse:
+        """加密货币周线 (V2 crypto klines with interval=1w)"""
+        pair = f"{symbol}{market}T" if market == "USD" else f"{symbol}{market}"
+        return self.get("/api/v2/crypto/klines", params={"exchange": "binance", "symbol": pair, "interval": "1w", "limit": limit})
 
     def v2_av_insider_transactions(self, symbol: str) -> APIResponse:
         """内部交易"""
-        return self.get(f"/api/v1/stocks/{symbol}/insider-transactions")
+        return self.get("/api/v2/usstock/finance/insider", params={"symbol": symbol})
 
     def v2_av_institutional_holdings(self, symbol: str) -> APIResponse:
         """机构持仓"""
-        return self.get(f"/api/v1/stocks/{symbol}/institutional-holdings")
-
-    def v2_av_analytics_fixed_window(self, symbol: str, calculations: str, start_date: str, end_date) -> APIResponse:
-        """高级分析 (固定窗口)"""
-        return self.get("/api/v2/usstock/analytics/fixed-window",
-                        params={"symbol": symbol, "calculations": calculations,
-                                "start_date": start_date, "end_date": end_date})
-
-    def v2_av_analytics_sliding_window(self, symbol: str, calculations: str, window: int = 20) -> APIResponse:
-        """高级分析 (滑动窗口)"""
-        return self.get("/api/v2/usstock/analytics/sliding-window",
-                        params={"symbol": symbol, "calculations": calculations, "window": window})
+        return self.get("/api/v2/usstock/finance/institutional", params={"symbol": symbol})
 
     # --- 商品 (专用端点) ---
     def v2_av_commodity(self, function_name: str) -> APIResponse:
-        """通用商品端点 (白名单内)"""
-        return self.get(f"/api/v1/market/commodities/{function_name}")
+        """通用商品端点"""
+        return self.get(f"/api/v2/commodity/{function_name}")
 
     def v2_av_gold_silver_spot(self) -> APIResponse:
-        return self.get("/api/v1/market/commodities/spot")
+        """贵金属现货"""
+        return self.get("/api/v2/commodity/spot")
 
     def v2_av_gold_silver_history(self, interval: str = "daily", limit: int = 100) -> APIResponse:
-        return self.get("/api/v1/market/commodities/history", params={"interval": interval, "limit": limit})
+        """贵金属历史 K 线"""
+        return self.get("/api/v2/commodity/klines", params={"symbol": "GOLD", "interval": interval})
 
     # --- 指数 ---
     def v2_av_index_data(self, symbol: str, interval: str = "daily", limit: int = 100) -> APIResponse:
         """指数数据"""
-        return self.get(f"/api/v1/market/index/{symbol}/klines", params={"interval": interval, "limit": limit})
+        return self.get("/api/v2/index/klines", params={"symbol": symbol, "interval": interval, "limit": limit})
 
     def v2_av_index_catalog(self) -> APIResponse:
         """指数目录"""
-        return self.get("/api/v1/market/index/catalog")
+        return self.get("/api/v2/index/symbols")
 
     def close(self):
         """Close the session"""

@@ -203,22 +203,11 @@ def test_av_etf_profile(tester: BaseTester) -> list:
 
 
 def test_av_listing_status(tester: BaseTester) -> list:
-    """上市/退市列表 LISTING_STATUS"""
-    results = []
-    resp = tester.client.v2_av_listing_status()
-    data = resp.data if isinstance(resp.data, dict) else {}
-    ok = resp.success and data.get("success") is True
-
-    if ok:
-        items = data.get("data") or []
-        ok = isinstance(items, list) and len(items) > 0
-
-    results.append(tester._make_result(
+    """上市/退市列表 — V2 无等价路由"""
+    return [tester._make_result(
         "LISTING_STATUS",
         "av_fundamental",
-        TestStatus.PASSED if ok else TestStatus.FAILED,
-        f"上市列表 - {'OK, ' + str(len(data.get('data', []))) + ' 条' if ok else 'FAILED'}",
-        resp.response_time_ms,
-        resp.error if not ok else None,
-    ))
-    return results
+        TestStatus.SKIPPED,
+        "V2 无 /api/v2/usstock/listing-status 路由",
+        0,
+    )]

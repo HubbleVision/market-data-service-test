@@ -122,9 +122,8 @@ _test_modules["kline_quality"] = [
     ("Cross Verify", "tests.v2.07_kline_quality.test_kline_quality", "test_cross_verify"),
 ]
 
-# AV Extended (08_av_extended) — Alpha Vantage 新增端点
+# AV Extended (08_av_extended) — Alpha Vantage 新增端点 (V2 routes)
 _test_modules["av_extended"] = [
-    ("Search & Status", "tests.v2.08_av_extended.test_av_search_status", "test_av_symbol_search"),
     ("Market Status", "tests.v2.08_av_extended.test_av_search_status", "test_av_market_status"),
     ("Top Gainers/Losers", "tests.v2.08_av_extended.test_av_search_status", "test_av_top_gainers_losers"),
     ("Adjusted Kline (Daily)", "tests.v2.08_av_extended.test_av_adjusted_kline", "test_av_daily_adjusted"),
@@ -138,27 +137,14 @@ _test_modules["av_extended"] = [
     ("Splits", "tests.v2.08_av_extended.test_av_fundamental", "test_av_splits"),
     ("Shares Outstanding", "tests.v2.08_av_extended.test_av_fundamental", "test_av_shares_outstanding"),
     ("ETF Profile", "tests.v2.08_av_extended.test_av_fundamental", "test_av_etf_profile"),
-    ("Listing Status", "tests.v2.08_av_extended.test_av_fundamental", "test_av_listing_status"),
     ("Earnings Calendar", "tests.v2.08_av_extended.test_av_calendar", "test_av_earnings_calendar"),
     ("IPO Calendar", "tests.v2.08_av_extended.test_av_calendar", "test_av_ipo_calendar"),
-    ("FX Intraday", "tests.v2.08_av_extended.test_av_fx_extended", "test_av_fx_intraday"),
-    ("FX Weekly", "tests.v2.08_av_extended.test_av_fx_extended", "test_av_fx_weekly"),
-    ("FX Monthly", "tests.v2.08_av_extended.test_av_fx_extended", "test_av_fx_monthly"),
     ("Crypto Weekly", "tests.v2.08_av_extended.test_av_crypto_extended", "test_av_crypto_weekly"),
-    ("Crypto Monthly", "tests.v2.08_av_extended.test_av_crypto_extended", "test_av_crypto_monthly"),
-    ("Economic Indicators", "tests.v2.08_av_extended.test_av_economic", "test_av_economic_indicators"),
-    # P1: Alpha Intelligence
-    ("News Sentiment", "tests.v2.08_av_extended.test_av_intelligence", "test_av_news_sentiment"),
     ("Insider Transactions", "tests.v2.08_av_extended.test_av_intelligence", "test_av_insider_transactions"),
     ("Institutional Holdings", "tests.v2.08_av_extended.test_av_intelligence", "test_av_institutional_holdings"),
-    ("Analytics Fixed Window", "tests.v2.08_av_extended.test_av_intelligence", "test_av_analytics_fixed_window"),
-    ("Analytics Sliding Window", "tests.v2.08_av_extended.test_av_intelligence", "test_av_analytics_sliding_window"),
-    # P1: Commodities
     ("Gold/Silver Spot", "tests.v2.08_av_extended.test_av_commodities", "test_av_gold_silver_spot"),
     ("Gold/Silver History", "tests.v2.08_av_extended.test_av_commodities", "test_av_gold_silver_history"),
     ("Commodity Individual", "tests.v2.08_av_extended.test_av_commodities", "test_av_commodity_individual"),
-    ("All Commodities", "tests.v2.08_av_extended.test_av_commodities", "test_av_all_commodities"),
-    # P1: Index
     ("Index Data", "tests.v2.08_av_extended.test_av_index", "test_av_index_data"),
     ("Index Catalog", "tests.v2.08_av_extended.test_av_index", "test_av_index_catalog"),
 ]

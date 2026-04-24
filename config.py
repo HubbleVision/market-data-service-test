@@ -4,7 +4,7 @@ Configuration for Market Data Service Test Framework
 import os
 
 # Base URL for the market data service
-BASE_URL = os.getenv("MARKET_DATA_SERVICE_URL", "http://172.17.0.1:3101")
+BASE_URL = os.getenv("MARKET_DATA_SERVICE_URL", "http://localhost:8080")
 
 # API Key for authentication
 API_KEY = os.getenv("MARKET_DATA_API_KEY", "7fXZt817QOeBr4H2XH/mDmhKO+2yybe1prDYDSg4HOD8gC7qeiZBfscuZgtMnVOK")

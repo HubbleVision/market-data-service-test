@@ -39,23 +39,24 @@ _test_modules["indicators"] = [
 
 # Crypto (01_crypto)
 _test_modules["crypto"] = [
-    ("K-line", "tests.v2.01_crypto.test_kline", "test_v2_kline"),
-    ("Exchanges", "tests.v2.01_crypto.test_exchanges", "test_v2_exchanges"),
-    ("Open Interest", "tests.v2.01_crypto.test_open_interest", "test_open_interest"),
-    ("Funding Rate", "tests.v2.01_crypto.test_funding_rate", "test_funding_rate"),
-    ("Liquidation", "tests.v2.01_crypto.test_liquidation", "test_liquidation"),
-    ("Long/Short", "tests.v2.01_crypto.test_long_short", "test_long_short"),
-    ("CVD/BuySell", "tests.v2.01_crypto.test_cvd_buy_sell", "test_cvd_buy_sell"),
-    ("ETF", "tests.v2.01_crypto.test_etf", "test_etf"),
-    ("Whale/LargeOrder", "tests.v2.01_crypto.test_whale_large_order", "test_whale_large_order"),
-    ("Ranking", "tests.v2.01_crypto.test_ranking", "test_ranking"),
-    ("OrderBook", "tests.v2.01_crypto.test_orderbook", "test_orderbook"),
-    ("Capital Flow", "tests.v2.01_crypto.test_capital_flow", "test_capital_flow"),
-    ("Crypto Indicators", "tests.v2.01_crypto.test_crypto_indicators", "test_crypto_indicators"),
-    ("Market Overview", "tests.v2.01_crypto.test_market_overview", "test_market_overview"),
-    ("News", "tests.v2.01_crypto.test_news", "test_news"),
-    ("Crypto Misc", "tests.v2.01_crypto.test_crypto_misc", "test_crypto_misc"),
-    ("Crypto Proxy", "tests.v2.01_crypto.test_crypto_proxy", "test_crypto_proxy"),
+    ("K-line", "tests.v2.01_crypto.test_crypto_basic", "test_crypto_klines"),
+    ("Exchanges", "tests.v2.01_crypto.test_crypto_basic", "test_crypto_basic"),
+    ("Open Interest", "tests.v2.01_crypto.test_crypto_open_interest", "test_crypto_oi_list"),
+    ("OI History", "tests.v2.01_crypto.test_crypto_open_interest", "test_crypto_oi_history"),
+    ("OI Realtime", "tests.v2.01_crypto.test_crypto_open_interest", "test_crypto_oi_realtime"),
+    ("Funding Rate", "tests.v2.01_crypto.test_crypto_funding", "test_crypto_funding_realtime"),
+    ("Funding History", "tests.v2.01_crypto.test_crypto_funding", "test_crypto_funding_history"),
+    ("Funding Aggregated", "tests.v2.01_crypto.test_crypto_funding", "test_crypto_funding_aggregated"),
+    ("Liquidation Realtime", "tests.v2.01_crypto.test_crypto_liquidation", "test_crypto_liquidation_realtime"),
+    ("Liquidation History", "tests.v2.01_crypto.test_crypto_liquidation", "test_crypto_liquidation_history"),
+    ("Liquidation Heatmap", "tests.v2.01_crypto.test_crypto_liquidation", "test_crypto_liquidation_heatmap"),
+    ("Long/Short Exchange", "tests.v2.01_crypto.test_crypto_long_short", "test_crypto_long_short_exchange"),
+    ("Long/Short Account", "tests.v2.01_crypto.test_crypto_long_short", "test_crypto_long_short_account"),
+    ("Long/Short Kline", "tests.v2.01_crypto.test_crypto_long_short", "test_crypto_long_short_kline"),
+    ("Long/Short Taker", "tests.v2.01_crypto.test_crypto_long_short", "test_crypto_long_short_taker"),
+    ("Crypto Indicators", "tests.v2.02_indicators.test_crypto_indicators", "test_crypto_indicators"),
+    ("Crypto Whale", "tests.v2.01_crypto.test_crypto_whale", "test_crypto_whale"),
+    ("Crypto Ranking", "tests.v2.01_crypto.test_crypto_ranking", "test_crypto_ranking"),
 ]
 
 # CNStock (03_cnstock)
@@ -149,7 +150,14 @@ _test_modules["av_extended"] = [
     ("Index Catalog", "tests.v2.08_av_extended.test_av_index", "test_av_index_catalog"),
 ]
 
-DEFAULT_MODULES = ["common", "indicators", "crypto", "cnstock", "hkstock", "usstock", "market", "kline_quality", "av_extended"]
+# Commodity (09_commodity) - 商品数据
+_test_modules["commodity"] = [
+    ("Commodity Spot", "tests.v2.09_commodity.test_commodity", "test_commodity_spot"),
+    ("Commodity Klines", "tests.v2.09_commodity.test_commodity", "test_commodity_klines"),
+    ("Commodity Other", "tests.v2.09_commodity.test_commodity", "test_commodity_other"),
+]
+
+DEFAULT_MODULES = ["common", "indicators", "crypto", "cnstock", "hkstock", "usstock", "market", "kline_quality", "av_extended", "commodity"]
 
 
 def run_modules(selected_modules):

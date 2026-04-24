@@ -10,9 +10,12 @@ def test_validation(tester: BaseTester) -> list:
     """Validate market required, enum, crypto needs exchange, normal requests"""
     results = []
 
+    # Use CN market symbol from config for validation tests
+    cn_symbol = V2_MARKET_CONFIG["cn"]["symbol"]
+
     # 1. Missing market -> 422
     resp = tester.client.get("/api/v2/indicators/sma", params={
-        "symbol": "000001.SZ", "interval": "1d"
+        "symbol": cn_symbol, "interval": "1d"
     })
     results.append(tester._make_result(
         "Validation: missing market",
@@ -25,7 +28,7 @@ def test_validation(tester: BaseTester) -> list:
 
     # 2. Invalid market value -> 422
     resp = tester.client.get("/api/v2/indicators/sma", params={
-        "market": "invalid", "symbol": "000001.SZ", "interval": "1d"
+        "market": "invalid", "symbol": cn_symbol, "interval": "1d"
     })
     results.append(tester._make_result(
         "Validation: invalid market value",
@@ -36,9 +39,10 @@ def test_validation(tester: BaseTester) -> list:
         resp.error,
     ))
 
-    # 3. Crypto without exchange -> 400
-    resp = tester.client.get("/api/v2/indicators/sma", params={
-        "market": "crypto", "symbol": "BTCUSDT", "interval": "1d"
+    # 3. Crypto without exchange -> 400 (using crypto-specific endpoint)
+    resp = tester.client.get("/api/v2/crypto/indicators/sma", params={
+        "symbol": "BTCUSDT", "interval": "1d"
+        # note: no exchange param, should fail
     })
     results.append(tester._make_result(
         "Validation: crypto without exchange",
@@ -50,12 +54,22 @@ def test_validation(tester: BaseTester) -> list:
     ))
 
     # 4. Crypto + cn normal requests -> 200
+    # Crypto uses /api/v2/crypto/indicators/, cn uses /api/v2/indicators/
     for market in ("crypto", "cn"):
         cfg = V2_MARKET_CONFIG[market]
-        params = {"market": market, "symbol": cfg["symbol"], "interval": cfg["interval"]}
+        params = {"symbol": cfg["symbol"], "interval": cfg["interval"]}
         if cfg.get("exchange"):
             params["exchange"] = cfg["exchange"]
-        resp = tester.client.get("/api/v2/indicators/sma", params=params)
+
+        if market == "crypto":
+            endpoint = "/api/v2/crypto/indicators/sma"
+            if not cfg.get("exchange"):
+                params["exchange"] = "binance"
+        else:
+            endpoint = "/api/v2/indicators/sma"
+            params["market"] = market
+
+        resp = tester.client.get(endpoint, params=params)
         results.append(tester._make_result(
             f"Validation: {market} normal request",
             "validation",

@@ -78,12 +78,22 @@ def test_new_single_value_indicators(tester: BaseTester) -> list:
         tester._log(f"\n--- Testing new single-value indicators for market: {market} ---")
 
         for indicator in SINGLE_VALUE_INDICATORS:
-            params = {"market": market, "symbol": cfg["symbol"], "interval": cfg["interval"]}
+            params = {"symbol": cfg["symbol"], "interval": cfg["interval"]}
             if cfg.get("exchange"):
                 params["exchange"] = cfg["exchange"]
             params.update(NEW_INDICATOR_PARAMS.get(indicator, {}))
 
-            resp = tester.client.get(f"/api/v2/indicators/{indicator}", params=params)
+            # crypto uses separate endpoint /api/v2/crypto/indicators/{indicator}
+            # cn uses /api/v2/indicators/{indicator} with market param
+            if market == "crypto":
+                endpoint = f"/api/v2/crypto/indicators/{indicator}"
+                if not cfg.get("exchange"):
+                    params["exchange"] = "binance"
+            else:
+                endpoint = f"/api/v2/indicators/{indicator}"
+                params["market"] = market
+
+            resp = tester.client.get(endpoint, params=params)
             data = resp.data if isinstance(resp.data, dict) else {}
             ok = resp.success
 
@@ -111,12 +121,22 @@ def test_new_multi_value_indicators(tester: BaseTester) -> list:
         tester._log(f"\n--- Testing new multi-value indicators for market: {market} ---")
 
         for indicator, expected_fields in MULTI_VALUE_INDICATORS.items():
-            params = {"market": market, "symbol": cfg["symbol"], "interval": cfg["interval"]}
+            params = {"symbol": cfg["symbol"], "interval": cfg["interval"]}
             if cfg.get("exchange"):
                 params["exchange"] = cfg["exchange"]
             params.update(NEW_INDICATOR_PARAMS.get(indicator, {}))
 
-            resp = tester.client.get(f"/api/v2/indicators/{indicator}", params=params)
+            # crypto uses separate endpoint /api/v2/crypto/indicators/{indicator}
+            # cn uses /api/v2/indicators/{indicator} with market param
+            if market == "crypto":
+                endpoint = f"/api/v2/crypto/indicators/{indicator}"
+                if not cfg.get("exchange"):
+                    params["exchange"] = "binance"
+            else:
+                endpoint = f"/api/v2/indicators/{indicator}"
+                params["market"] = market
+
+            resp = tester.client.get(endpoint, params=params)
             data = resp.data if isinstance(resp.data, dict) else {}
             ok = resp.success
             msg = ""
